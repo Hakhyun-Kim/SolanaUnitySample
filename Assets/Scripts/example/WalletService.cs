@@ -11,7 +11,7 @@ namespace Solana.Unity.SDK.Example
     public enum StorageMethod { Json, SimpleTxt }
 
     [RequireComponent(typeof(MainThreadDispatcher))]
-    public class WalletH : MonoBehaviour
+    public class WalletService : MonoBehaviour
     {
         [SerializeField]
         private RpcCluster rpcCluster = RpcCluster.DevNet;
@@ -30,7 +30,7 @@ namespace Solana.Unity.SDK.Example
 
         public WalletBase Wallet;
 
-        public static WalletH Instance;
+        public static WalletService Instance;
         
         // Convenience shortnames for accessing commonly used wallet methods
         public static IRpcClient Rpc => Instance != null ? Instance.Wallet?.ActiveRpcClient : null;
@@ -170,6 +170,6 @@ namespace Solana.Unity.SDK.Example
     [Obsolete("Deprecated, use WalletH instead", true)]
     public static class SimpleWallet
     {
-        public static WalletH Instance => WalletH.Instance;
+        public static WalletService Instance => WalletService.Instance;
     }
 }

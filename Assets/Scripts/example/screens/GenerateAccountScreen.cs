@@ -80,7 +80,7 @@ namespace Solana.Unity.SDK.Example
             var mnemonic = mnemonicTxt.text.Trim();
             try
             {
-                await WalletH.Instance.CreateAccount(mnemonic, password);
+                await WalletService.Instance.CreateAccount(mnemonic, password);
                 manager.ShowScreen(this, "wallet_screen");
                 needPasswordTxt.gameObject.SetActive(false);
             }
