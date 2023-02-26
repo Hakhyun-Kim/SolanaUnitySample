@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using Solana.Unity.Rpc;
 using Solana.Unity.Wallet;
 using UnityEngine;
+using Frictionless;
+using System.Collections;
 
 // ReSharper disable once CheckNamespace
 
@@ -11,7 +13,7 @@ namespace Solana.Unity.SDK.Example
     public enum StorageMethod { Json, SimpleTxt }
 
     [RequireComponent(typeof(MainThreadDispatcher))]
-    public class WalletService : MonoBehaviour
+    public class WalletService : MonoBehaviour, IMultiSceneSingleton
     {
         [SerializeField]
         private RpcCluster rpcCluster = RpcCluster.DevNet;
@@ -40,14 +42,16 @@ namespace Solana.Unity.SDK.Example
 
         public void Awake()
         {
-            if (Instance == null)
+            if (ServiceFactory.Resolve<WalletService>() != null)
             {
-                Instance = this;
-            }
-            else
-            {
+                Debug.LogWarning("wallet service is already exist!");
                 Destroy(gameObject);
+                return;
             }
+
+            ServiceFactory.RegisterSingleton(this);
+
+            Instance = ServiceFactory.Resolve<WalletService>();
         }
         
         public void Start()
@@ -161,6 +165,11 @@ namespace Solana.Unity.SDK.Example
         public static void Setup()
         {
             MainThreadUtil.Setup();
+        }
+
+        public IEnumerator HandleNewSceneLoaded()
+        {
+            yield return null;
         }
     }
     
