@@ -13,9 +13,9 @@ using Solana.Unity.Dex;
 using Solana.Unity.Dex.Models;
 using Solana.Unity.Dex.Quotes;
 using Solana.Unity.Rpc.Types;
+using Solana.Unity.SDK;
 using Solana.Unity.SDK.Example;
 using Solana.Unity.SDK.Utility;
-using Solana.Unity.Wallet;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -58,7 +58,8 @@ public class SwapScreen : SimpleScreen
     void Start()
     {
         _dex = new OrcaDex(
-            WalletService.Instance.Wallet.ActiveRpcClient,
+            Web3.Account, 
+            Web3.Rpc,
             commitment: Commitment.Finalized);
         dropdownTokenA.onValueChanged.AddListener(_ => OptionSelected(dropdownTokenA).Forget());
         dropdownTokenB.onValueChanged.AddListener(_ => OptionSelected(dropdownTokenB).Forget());
@@ -77,9 +78,9 @@ public class SwapScreen : SimpleScreen
     {
         if(_whirlpool == null || _swapQuote == null) return;
         var tr = await _dex.SwapWithQuote(_whirlpool.Address, _swapQuote);
-        var result = await WalletService.Instance.Wallet.SignAndSendTransaction(tr);
+        var result = await Web3.Instance.Wallet.SignAndSendTransaction(tr);
         Debug.Log(result.Result);
-        await WalletService.Instance.Wallet.ActiveRpcClient.ConfirmTransaction(result.Result, Commitment.Confirmed);
+        await Web3.Instance.Wallet.ActiveRpcClient.ConfirmTransaction(result.Result, Commitment.Confirmed);
         Debug.Log("Transaction confirmed");
         await UniTask.SwitchToMainThread(); 
         manager.ShowScreen(this,"wallet_screen");
