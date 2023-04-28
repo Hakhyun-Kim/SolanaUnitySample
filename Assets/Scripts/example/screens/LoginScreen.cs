@@ -14,13 +14,13 @@ namespace Solana.Unity.SDK.Example
         [SerializeField]
         private TextMeshProUGUI passwordText;
         [SerializeField]
-        private Button loginBtn;
+        private Button loginBtn; 
         [SerializeField]
         private Button loginBtnGoogle;
         [SerializeField]
         private Button loginBtnTwitter;
         [SerializeField]
-        private Button loginBtnPhantom;
+        private Button loginBtnWalletAdapter;
         [SerializeField]
         private Button loginBtnSms;
         [SerializeField]
@@ -34,6 +34,13 @@ namespace Solana.Unity.SDK.Example
         {
             dropdownRpcCluster.interactable = true;
             passwordInputField.text = string.Empty;
+
+            if (Web3.Base != null)
+            {
+                dropdownRpcCluster.interactable = false;
+                manager.ShowScreen(this, "wallet_screen");
+                gameObject.SetActive(false);
+            }
         }
 
         private void Start()
@@ -45,34 +52,28 @@ namespace Solana.Unity.SDK.Example
             loginBtn.onClick.AddListener(LoginChecker);
             loginBtnGoogle.onClick.AddListener(delegate{LoginCheckerWeb3Auth(Provider.GOOGLE);});
             loginBtnTwitter.onClick.AddListener(delegate{LoginCheckerWeb3Auth(Provider.TWITTER);});
-            loginBtnPhantom.onClick.AddListener(LoginCheckerPhantom);
+            loginBtnWalletAdapter.onClick.AddListener(LoginCheckerWalletAdapter);
             loginBtnSms.onClick.AddListener(LoginCheckerSms);
             loginBtnXNFT.onClick.AddListener(LoginCheckerXnft);
-
-            if (Application.platform != RuntimePlatform.Android && 
-                Application.platform != RuntimePlatform.IPhonePlayer
-                && Application.platform != RuntimePlatform.WindowsPlayer
-                && Application.platform != RuntimePlatform.WindowsEditor
-                && Application.platform != RuntimePlatform.LinuxPlayer
-                && Application.platform != RuntimePlatform.LinuxEditor
-                && Application.platform != RuntimePlatform.OSXPlayer
-                && Application.platform != RuntimePlatform.OSXEditor)
-            {
-                loginBtnGoogle.gameObject.SetActive(false);
-                loginBtnTwitter.gameObject.SetActive(false);
-            }
+            
             loginBtnXNFT.gameObject.SetActive(false);
             
             if (Application.platform == RuntimePlatform.Android)
             {
-                loginBtnPhantom.gameObject.SetActive(false);
+                loginBtnWalletAdapter.gameObject.SetActive(false);
                 loginBtnSms.gameObject.SetActive(true);
+            }
+            
+            if (Application.platform is RuntimePlatform.LinuxEditor or RuntimePlatform.WindowsEditor or RuntimePlatform.OSXEditor)
+            {
+                loginBtnWalletAdapter.onClick.RemoveListener(LoginCheckerWalletAdapter);
+                loginBtnWalletAdapter.onClick.AddListener(() =>
+                    Debug.LogWarning("Wallet adapter login is not yet supported in the editor"));
             }
 
             if(messageTxt != null)
                 messageTxt.gameObject.SetActive(false);
         }
-
         private async void LoginChecker()
         {
             var password = passwordInputField.text;
@@ -107,6 +108,14 @@ namespace Solana.Unity.SDK.Example
         {
             if(Web3.Instance == null) return;
             var account = await Web3.Instance.LoginXNFT();
+            messageTxt.text = "";
+            CheckAccount(account);
+        }
+        
+        private async void LoginCheckerWalletAdapter()
+        {
+            if(Web3.Instance == null) return;
+            var account = await Web3.Instance.LoginWalletAdapter();
             messageTxt.text = "";
             CheckAccount(account);
         }
